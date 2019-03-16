@@ -1,4 +1,5 @@
-import { AccessControl, Permission } from 'accesscontrol';
+import { AccessControl } from 'accesscontrol';
+import { flatten } from 'ramda';
 import { AclPermission } from './AclPermission';
 
 interface AclOptions {
@@ -10,10 +11,10 @@ interface AclOptions {
 }
 
 interface AclQuery {
-    create(resource: any, type: string): Permission;
-    delete(resource: any, type: string): Permission;
-    read(resource: any, type: string): Permission;
-    update(resource: any, type: string): Permission;
+    create(resource: any, type: string): AclPermission;
+    delete(resource: any, type: string): AclPermission;
+    read(resource: any, type: string): AclPermission;
+    update(resource: any, type: string): AclPermission;
 }
 
 interface OwnerFunctions {
@@ -30,8 +31,8 @@ interface CustomFunction {
 
 interface PermissionOptions {
     action: Action;
-    user: any;
-    resource: any;
+    attributes: string[];
+    granted: boolean;
     resourceType: string;
 }
 
@@ -62,7 +63,6 @@ export class Acl {
     public can(user: object): AclQuery {
         return {
             create: (resource: any, resourceType: string) => {
-                const role = this.options.getRoles(user)[0];
                 const customFunctions = this.customFunctions[Action.create][resourceType];
                 if (customFunctions) {
                     return this.getPermission(customFunctions, {
@@ -72,13 +72,23 @@ export class Acl {
                         action: Action.create,
                     });
                 }
-                if (this.ownerFunctions[resourceType] && this.ownerFunctions[resourceType](user, resource)) {
-                    return this.ac.can(role).createOwn(resourceType);
-                }
-                return this.ac.can(role).createAny(resourceType);
+                let attributes = flatten(this.options.getRoles(user)
+                    .map(role => {
+                        if (this.ownerFunctions[resourceType] && this.ownerFunctions[resourceType](user, resource)) {
+                            return this.ac.can(role).createOwn(resourceType).attributes;
+                        }
+                        return this.ac.can(role).createAny(resourceType).attributes;
+                    })
+                );
+                attributes = [... new Set(attributes)];
+                return this.createPermission(user, {
+                    attributes,
+                    resourceType,
+                    action: Action.create,
+                    granted: attributes.length > 0,
+                });
             },
             delete: (resource: any, resourceType: string) => {
-                const role = this.options.getRoles(user)[0];
                 const customFunctions = this.customFunctions[Action.delete][resourceType];
                 if (customFunctions) {
                     return this.getPermission(customFunctions, {
@@ -88,13 +98,23 @@ export class Acl {
                         action: Action.delete,
                     });
                 }
-                if (this.ownerFunctions[resourceType] && this.ownerFunctions[resourceType](user, resource)) {
-                    return this.ac.can(role).deleteOwn(resourceType);
-                }
-                return this.ac.can(role).deleteAny(resourceType);
+                let attributes = flatten(this.options.getRoles(user)
+                    .map(role => {
+                        if (this.ownerFunctions[resourceType] && this.ownerFunctions[resourceType](user, resource)) {
+                            return this.ac.can(role).createOwn(resourceType).attributes;
+                        }
+                        return this.ac.can(role).createAny(resourceType).attributes;
+                    })
+                );
+                attributes = [... new Set(attributes)];
+                return this.createPermission(user, {
+                    attributes,
+                    resourceType,
+                    action: Action.create,
+                    granted: attributes.length > 0,
+                });
             },
             read: (resource: any, resourceType: string) => {
-                const role = this.options.getRoles(user)[0];
                 const customFunctions = this.customFunctions[Action.read][resourceType];
                 if (customFunctions) {
                     return this.getPermission(customFunctions, {
@@ -104,10 +124,21 @@ export class Acl {
                         action: Action.read,
                     });
                 }
-                if (this.ownerFunctions[resourceType] && this.ownerFunctions[resourceType](user, resource)) {
-                    return this.ac.can(role).readOwn(resourceType);
-                }
-                return this.ac.can(role).readAny(resourceType);
+                let attributes = flatten(this.options.getRoles(user)
+                    .map(role => {
+                        if (this.ownerFunctions[resourceType] && this.ownerFunctions[resourceType](user, resource)) {
+                            return this.ac.can(role).createOwn(resourceType).attributes;
+                        }
+                        return this.ac.can(role).createAny(resourceType).attributes;
+                    })
+                );
+                attributes = [... new Set(attributes)];
+                return this.createPermission(user, {
+                    attributes,
+                    resourceType,
+                    action: Action.create,
+                    granted: attributes.length > 0,
+                });
             },
             update: (resource: any, resourceType: string) => {
                 const customFunctions = this.customFunctions[Action.update][resourceType];
@@ -119,27 +150,46 @@ export class Acl {
                         action: Action.update,
                     });
                 }
-                const role = this.options.getRoles(user)[0];
-                if (this.ownerFunctions[resourceType] && this.ownerFunctions[resourceType](user, resource)) {
-                    return this.ac.can(role).updateOwn(resourceType);
-                }
-                return this.ac.can(role).updateAny(resourceType);
+                let attributes = flatten(this.options.getRoles(user)
+                    .map(role => {
+                        if (this.ownerFunctions[resourceType] && this.ownerFunctions[resourceType](user, resource)) {
+                            return this.ac.can(role).createOwn(resourceType).attributes;
+                        }
+                        return this.ac.can(role).createAny(resourceType).attributes;
+                    })
+                );
+                attributes = [... new Set(attributes)];
+                return this.createPermission(user, {
+                    attributes,
+                    resourceType,
+                    action: Action.create,
+                    granted: attributes.length > 0,
+                });
             },
         };
     }
     public async addRule(action: Action, resourceType: string, rule: AddRule) {
         this.customFunctions[action][resourceType].push(rule);
     }
-    private getPermission(customFunctions: CustomRule[], options: PermissionOptions) {
+    private getPermission(customFunctions: CustomRule[], options: { user: any, resource: any, action: Action, resourceType: string }) {
         const result = customFunctions
             .map(async customFunction => await customFunction(options.user, options.resource))
             .filter(x => x);
-        return new AclPermission({
+        return this.createPermission(options.user, {
             action: options.action,
             attributes: result.length > 0 ? ['*'] : [],
             granted: result.length > 0,
-            resource: options.resourceType,
-            roles: this.options.getRoles(options.user),
+            resourceType: options.resourceType,
+        });
+    }
+    private createPermission(user: any, params: PermissionOptions) {
+        const attributes = params.attributes;
+        return new AclPermission({
+            action: params.action,
+            attributes: !attributes.includes('*') ? attributes : ['*'],
+            granted: params.granted,
+            resource: params.resourceType,
+            roles: this.options.getRoles(user),
         });
     }
 }
