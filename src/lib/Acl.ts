@@ -1,4 +1,4 @@
-import {AccessControl, Permission, Query} from 'accesscontrol';
+import { AccessControl, Permission } from 'accesscontrol';
 
 interface AclOptions {
     getRoles(user: any): string[];
