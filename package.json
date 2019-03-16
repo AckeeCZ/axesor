@@ -2,10 +2,10 @@
   "name": "package-template",
   "description": "package-template",
   "version": "0.1.0",
-  "author": "Jaroslav Šmolík <grissius@gmail.com>",
+  "author": "Štefan Prokop <sprokop1010@seznam.cz>",
   "contributors": [
-    "Jaroslav Šmolík <grissius@gmail.com>",
-    "Štefan Prokop <sprokop1010@seznam.cz>"
+    "Štefan Prokop <sprokop1010@seznam.cz>",
+    "Michal Vlasák <michal.vlasak@ackee.cz>"
   ],
   "main": "./dist/main.js",
   "engines": {
