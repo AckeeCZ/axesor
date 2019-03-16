@@ -1,4 +1,4 @@
-import { Acl } from 'lib/acl';
+import { Acl } from 'lib/Acl';
 import { pick } from 'ramda';
 
 describe('ACL', () => {
