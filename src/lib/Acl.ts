@@ -1,10 +1,12 @@
-
 import { AccessControl, Permission } from 'accesscontrol';
 import { AclPermission } from './AclPermission';
 
 interface AclOptions {
     getRoles(user: any): string[];
     logger?: any;
+    ownerFunctions?: {
+        [key: string]: (user: any, resource: any) => boolean;
+    };
 }
 
 interface AclQuery {
@@ -45,6 +47,7 @@ export class Acl {
     constructor(private grantsObject: any, private options: AclOptions) {
         this.ac = new AccessControl(grantsObject);
         this.logger = options.logger || console;
+        this.ownerFunctions = options.ownerFunctions || {};
         for (const actionKey in Action) {
             this.customFunctions[actionKey] = {} as CustomFunction;
         }

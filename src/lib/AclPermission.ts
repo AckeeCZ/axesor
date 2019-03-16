@@ -1,4 +1,4 @@
-import { Permission } from 'accesscontrol';
+import { Permission } from 'accesscontrol/lib/core/Permission';
 
 interface AclPermissionParams {
     action: string;
@@ -14,16 +14,19 @@ export class AclPermission extends Permission {
     readonly resource: string;
     readonly attributes: string[];
     constructor(params: AclPermissionParams) {
-        super({}, {
-            action: params.action,
-            resource: params.resource,
-            role: params.roles,
-            possession: '',
-        });
+        super(
+            {},
+            {
+                action: params.action,
+                resource: params.resource,
+                role: params.roles,
+                possession: '',
+            }
+        );
         this.roles = params.roles;
         this.granted = params.granted;
         this.resource = params.resource;
         this.attributes = params.attributes;
     }
-    public filter(data: any): any {}
+    public filter(_data: any): any {}
 }
