@@ -29,6 +29,7 @@
   },
   "dependencies": {
     "accesscontrol": "^2.2.1",
+    "jsonpath": "^1.0.1",
     "ramda": "^0.26.1"
   },
   "devDependencies": {

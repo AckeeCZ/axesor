@@ -128,6 +128,42 @@ describe('ACL', () => {
 
         expect(permission.granted).toBe(true);
         expect(permission.attributes).toEqual(['*']);
-        expect(allowedBook).toBe(book);
+        expect(allowedBook).toEqual(book);
+    });
+    test('Basic rule - nested object', () => {
+        const ac = new Acl(
+            {
+                user: {
+                    books: {
+                        'create:any': ['title', 'author', 'address.id', 'pages.*.number'],
+                    },
+                },
+            },
+            {
+                getRoles: user => user.roles,
+            }
+        );
+        const user = { id: 1, roles: ['user'] };
+        const bookPages = [{ id: 1, number: 64 }, { id: 2, number: 23 }];
+        const book = {
+            id: 1,
+            ownerId: 1,
+            title: 'The Firm',
+            author: 'John Grisham',
+            address: { id: 1, name: 'D Book' },
+            pages: bookPages,
+        };
+
+        const permission = ac.can(user).create(book, 'books');
+        const allowedBook = permission.filter(book);
+
+        expect(permission.granted).toBe(true);
+        expect(permission.attributes).toEqual(['title', 'author', 'address.id', 'pages.*.number']);
+        expect(allowedBook).toEqual({
+            title: book.title,
+            author: book.author,
+            address: { id: book.address.id },
+            pages: bookPages.map(pick(['number'])),
+        });
     });
 });

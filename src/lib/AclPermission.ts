@@ -1,4 +1,5 @@
-import { intersection, pick } from 'ramda';
+import { assocPath, path } from 'ramda';
+const jp = require('jsonpath');
 
 interface AclPermissionParams {
     action: string;
@@ -20,9 +21,11 @@ export class AclPermission {
         this.attributes = params.attributes;
     }
     public filter(data: any): any {
-        if (this.attributes[0] === '*') {
-            return data;
-        }
-        return pick(intersection(Object.keys(data), this.attributes), data);
+        return this.attributes
+            .map(attribute => jp.paths(data, `$..${attribute}`))
+            .reduce((a, b) => a.concat(b), [])
+            .map((jpPath: string[]) => jpPath.slice(1))
+            .map((jpPath: string[]) => [jpPath, path(jpPath, data)])
+            .reduce((acc: any, [jpPath, data]: [string[], any]) => assocPath(jpPath, data, acc), {});
     }
 }
