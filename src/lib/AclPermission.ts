@@ -1,3 +1,4 @@
+import { intersection, pick } from 'ramda';
 
 interface AclPermissionParams {
     action: string;
@@ -18,5 +19,10 @@ export class AclPermission {
         this.resource = params.resource;
         this.attributes = params.attributes;
     }
-    public filter(_data: any): any {}
+    public filter(data: any): any {
+        if (this.attributes[0] === '*') {
+            return data;
+        }
+        return pick(intersection(Object.keys(data), this.attributes), data);
+    }
 }

@@ -74,7 +74,7 @@ describe('ACL', () => {
         expect(permission.attributes).toEqual(['*']);
         expect(allowedBook).toEqual(book);
     });
-    test.only('Basic rule - multiple roles', () => {
+    test('Basic rule - multiple roles', () => {
         const ac = new Acl(
             {
                 user: {
@@ -100,7 +100,7 @@ describe('ACL', () => {
 
         expect(permission.granted).toBe(true);
         expect(permission.attributes).toEqual(['title', 'author', 'id']);
-        expect(allowedBook).toBe(pick(['title', 'author', 'id'], book));
+        expect(allowedBook).toEqual(pick(['title', 'author', 'id'], book));
     });
     test('Basic rule - multiple roles asterisk', () => {
         const ac = new Acl(
@@ -127,7 +127,7 @@ describe('ACL', () => {
         const allowedBook = permission.filter(book);
 
         expect(permission.granted).toBe(true);
-        expect(permission.attributes).toBe(['*']);
+        expect(permission.attributes).toEqual(['*']);
         expect(allowedBook).toBe(book);
     });
 });
