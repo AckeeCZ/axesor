@@ -1,6 +1,6 @@
 {
-  "name": "package-template",
-  "description": "package-template",
+  "name": "axesor",
+  "description": "Axesor is tiny package for working with ACLs",
   "version": "0.1.0",
   "author": "Štefan Prokop <sprokop1010@seznam.cz>",
   "contributors": [

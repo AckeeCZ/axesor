@@ -40,7 +40,7 @@ type AddRule = (user: any, resource: any) => boolean;
 type IsOwner = (user: any, resource: any) => boolean;
 type CustomRule = (user: any, resource: any) => boolean;
 
-enum Action {
+export enum Action {
     create = 'create',
     delete = 'delete',
     read = 'read',
@@ -57,10 +57,10 @@ export class Acl {
         this.logger = options.logger || console;
         this.ownerFunctions = options.ownerFunctions || {};
         for (const actionKey in Action) {
-            this.customFunctions[actionKey] = {} as CustomFunction;
+            this.customFunctions[actionKey] = {};
         }
     }
-    public can(user: object): AclQuery {
+    public can(user: any): AclQuery {
         return {
             create: (resource: any, resourceType: string) => {
                 const customFunctions = this.customFunctions[Action.create][resourceType];
@@ -113,11 +113,14 @@ export class Acl {
         };
     }
     public async addRule(action: Action, resourceType: string, rule: AddRule) {
+        if (!this.customFunctions[action][resourceType]) {
+            this.customFunctions[action][resourceType] = [];
+        }
         this.customFunctions[action][resourceType].push(rule);
     }
     private getPermission(customFunctions: CustomRule[], options: { user: any, resource: any, action: Action, resourceType: string }) {
         const result = customFunctions
-            .map(async customFunction => await customFunction(options.user, options.resource))
+            .map(customFunction => customFunction(options.user, options.resource))
             .filter(x => x);
         return this.createPermission(options.user, {
             action: options.action,
@@ -201,3 +204,5 @@ export class Acl {
         });
     }
 }
+
+export default Acl;

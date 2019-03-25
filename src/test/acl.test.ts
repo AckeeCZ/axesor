@@ -1,4 +1,4 @@
-import { Acl } from 'lib/Acl';
+import { Acl, Action } from 'lib/Acl';
 import { pick } from 'ramda';
 
 describe('ACL', () => {
@@ -165,5 +165,148 @@ describe('ACL', () => {
             address: { id: book.address.id },
             pages: bookPages.map(pick(['number'])),
         });
+    });
+    test('Simple custom rule', () => {
+        const ac = new Acl({
+            user: {
+                bookings: {
+                    'read:own': ['*'],
+                },
+            },
+        }, {
+            getRoles: (user: any) => user.roles,
+        });
+        ac.addRule(Action.read, 'bookings', (user, booking) => {
+            if (user.roles.includes('partner') && booking.partnerId === user.partnerId) {
+                return true;
+            }
+            if (user.roles.includes('user') && booking.state !== 'canceled') {
+                return true;
+            }
+            return user.roles.includes('admin');
+        });
+        const user = { id: 2, roles: ['user'], partnerId: null };
+        const booking = {
+            id: 1,
+            userId: 2,
+            partnerId: 3,
+            state: 'new',
+            description: 'Amazing description',
+            createdAt: new Date('2019-03-01'),
+        };
+        const permission = ac.can(user).read(booking, 'bookings');
+        const allowedBooking = permission.filter(booking);
+        expect(permission.granted).toBe(true);
+        expect(permission.attributes).toEqual(['*']);
+        expect(allowedBooking).toEqual(booking);
+    });
+    test('Simple custom rule - failure', () => {
+        const ac = new Acl({
+            partner: {
+                bookings: {
+                    'read:own': ['*'],
+                },
+            },
+        }, {
+            getRoles: (user: any) => user.roles,
+        });
+        ac.addRule(Action.read, 'bookings', (user, booking) => {
+            if (user.roles.includes('partner') && booking.partnerId === user.partnerId) {
+                return true;
+            }
+            if (user.roles.includes('user') && booking.state !== 'canceled') {
+                return true;
+            }
+            return user.roles.includes('admin');
+        });
+        const user = { id: 1, roles: ['partner'], partnerId: 2 };
+        const booking = {
+            id: 1,
+            userId: 2,
+            partnerId: 3,
+            state: 'new',
+            description: 'Amazing description',
+            createdAt: new Date('2019-03-01'),
+        };
+        const permission = ac.can(user).read(booking, 'bookings');
+        const allowedBooking = permission.filter(booking);
+        expect(permission.granted).toBe(false);
+        expect(permission.attributes).toEqual([]);
+        expect(allowedBooking).toEqual({});
+    });
+    test('Advanced custom rule', () => {
+        const ac = new Acl({
+            partner: {
+                bookings: {
+                    'read:own': ['*'],
+                },
+            },
+        }, {
+            getRoles: (user: any) => user.roles,
+        });
+        ac.addRule(Action.update, 'bookings', (user, booking) => {
+            if ((user.roles.includes('partner') && user.partnerId === booking.partnerId)
+                || user.roles.includes('admin')) {
+                return true;
+            }
+            throw new Error('You are not allowed to edit this booking');
+        });
+        ac.addRule(Action.update, 'bookings', (user, booking) => {
+            if (booking.state === 'closed' && !user.roles.includes('admin')) {
+                throw new Error('You are not allowed to edit closed booking');
+            }
+            return true;
+        });
+        const user = { id: 1, roles: ['partner'], partnerId: 3 };
+        const booking = {
+            id: 1,
+            userId: 2,
+            partnerId: 3,
+            state: 'new',
+            description: 'Amazing description',
+            createdAt: new Date('2019-03-01'),
+            updatedAt: null,
+        };
+        const permission = ac.can(user).update(booking, 'bookings');
+        const allowedBooking = permission.filter(booking);
+        expect(permission.granted).toBe(true);
+        expect(permission.attributes).toEqual(['*']);
+        expect(allowedBooking).toEqual(booking);
+    });
+    test('Advanced custom rule - failure', () => {
+        const ac = new Acl({
+            partner: {
+                bookings: {
+                    'read:own': ['*'],
+                },
+            },
+        }, {
+            getRoles: (user: any) => user.roles,
+        });
+        ac.addRule(Action.update, 'bookings', (user, booking) => {
+            if ((user.roles.includes('partner') && user.partnerId === booking.partnerId)
+                || user.roles.includes('admin')) {
+                return true;
+            }
+            throw new Error('You are not allowed to edit this booking');
+        });
+        ac.addRule(Action.update, 'bookings', (user, booking) => {
+            if (booking.state === 'closed' && !user.roles.includes('admin')) {
+                throw new Error('You are not allowed to edit closed booking');
+            }
+            return true;
+        });
+        const user = { id: 1, roles: ['partner'], partnerId: 4 };
+        const booking = {
+            id: 1,
+            userId: 2,
+            partnerId: 3,
+            state: 'new',
+            description: 'Amazing description',
+            createdAt: new Date('2019-03-01'),
+            updatedAt: null,
+        };
+        expect(() => ac.can(user).update(booking, 'bookings'))
+            .toThrow(Error);
     });
 });
