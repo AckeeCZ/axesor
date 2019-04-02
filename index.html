@@ -69,32 +69,87 @@
 					<a href="https://snyk.io/test/github/AckeeCZ/node-acl?targetFile=package.json"><img src="https://img.shields.io/snyk/vulnerabilities/github/AckeeCZ/node-acl.svg?style=flat-square" alt="Vulnerabilities"></a>
 					<a href="https://david-dm.org/AckeeCZ/node-acl"><img src="https://img.shields.io/david/AckeeCZ/node-acl.svg?style=flat-square" alt="Dependency Status"></a>
 				<a href="https://david-dm.org/AckeeCZ/node-acl?type=dev"><img src="https://img.shields.io/david/dev/AckeeCZ/node-acl.svg?style=flat-square" alt="Dev Dependency Status"></a></p>
-				<p>Axesor is tiny package for working with ACLs.</p>
-				<h2 id="setup">Setup</h2>
-				<h3 id="travis">Travis</h3>
+				<p>Axesor is tiny package for working with ACLs. Axesor using the <a href="https://github.com/onury/accesscontrol"><code>accesscontrol</code></a> package. </p>
+				<p>GitHub repository: <a href="https://github.com/AckeeCZ/axesor">https://github.com/AckeeCZ/axesor</a></p>
+				<h2 id="install">Install</h2>
+				<pre><code class="language-bash">npm i --save axesor</code></pre>
+				<h2 id="usage">Usage</h2>
+				<pre><code class="language-typescript"><span class="hljs-keyword">import</span> { Acl } <span class="hljs-keyword">from</span> <span class="hljs-string">'axesor'</span>;
+
+<span class="hljs-comment">// define all your grants</span>
+<span class="hljs-keyword">const</span> grants = {
+    admin: {
+        video: {
+            <span class="hljs-string">'create:any'</span>: [<span class="hljs-string">'*'</span>, <span class="hljs-string">'!views'</span>],
+            <span class="hljs-string">'read:any'</span>: [<span class="hljs-string">'*'</span>],
+            <span class="hljs-string">'update:any'</span>: [<span class="hljs-string">'*'</span>, <span class="hljs-string">'!views'</span>],
+            <span class="hljs-string">'delete:any'</span>: [<span class="hljs-string">'*'</span>]
+        }
+    },
+    user: {
+        video: {
+            <span class="hljs-string">'create:own'</span>: [<span class="hljs-string">'*'</span>, <span class="hljs-string">'!rating'</span>, <span class="hljs-string">'!views'</span>],
+            <span class="hljs-string">'read:own'</span>: [<span class="hljs-string">'*'</span>],
+            <span class="hljs-string">'update:own'</span>: [<span class="hljs-string">'*'</span>, <span class="hljs-string">'!rating'</span>, <span class="hljs-string">'!views'</span>],
+            <span class="hljs-string">'delete:own'</span>: [<span class="hljs-string">'*'</span>]
+        }
+    }
+};
+
+<span class="hljs-comment">// define options</span>
+<span class="hljs-keyword">const</span> options = {
+    getRoles: <span class="hljs-function">(<span class="hljs-params">user</span>) =&gt;</span> user.roles,     <span class="hljs-comment">// required - return string[]</span>
+    logger: <span class="hljs-built_in">console</span>,                    <span class="hljs-comment">// optional</span>
+    ownerFunctions: {                   <span class="hljs-comment">// optional - here you can specify ownership between resources</span>
+        video: <span class="hljs-function">(<span class="hljs-params">user, video</span>) =&gt;</span> user.id === video.userId,
+    },
+};
+
+<span class="hljs-keyword">const</span> ac = <span class="hljs-keyword">new</span> Acl(grants, options);
+<span class="hljs-comment">// user = logged user</span>
+<span class="hljs-comment">// .read(video, 'video')</span>
+<span class="hljs-comment">//      - first argument is resource (for example row from database)</span>
+<span class="hljs-comment">//      - second argument is string key - name of the resource you define in grants object</span>
+<span class="hljs-comment">// returns</span>
+<span class="hljs-comment">//      - granted: boolean      - if user is granted to read</span>
+<span class="hljs-comment">//      - action: string        - read, create, update, delete</span>
+<span class="hljs-comment">//      - roles: string[]       - user roles</span>
+<span class="hljs-comment">//      - resource: string      - resource string key representation from grants object</span>
+<span class="hljs-comment">//      - attributes: string[]  - JSON path string array of resource fields which user is allowed to read / update / create / delete - array of fields which you define in grants object</span>
+<span class="hljs-keyword">const</span> permission = ac.can(user).read(video, <span class="hljs-string">'video'</span>); <span class="hljs-comment">// .create(), .update(), .delete() with same arguments</span>
+<span class="hljs-comment">// you can use filter function to filter fields from resource which user can manipulate with</span>
+<span class="hljs-comment">// this function filters recursively</span>
+<span class="hljs-keyword">const</span> allowedVideo = permission.filter(video);</code></pre>
+				<h3 id="custom-rules">Custom rules</h3>
 				<ul>
-					<li>Update <code>.travis.yml</code></li>
-					<li>Log in to <a href="https://travis-ci.com">Travis</a></li>
-					<li>Add the project (wait for permission)</li>
-					<li>Update <code>script</code>, <code>deploy</code></li>
+					<li>You can define custom rules, these functions are called always when you are calling one of the <code>read</code> / <code>update</code> / <code>create</code> / <code>delete</code> functions</li>
+					<li>Custom rules returns inside the <code>attributes</code> field only <code>[]</code> or <code>[&#39;*&#39;]</code> - not allowed or allowed with all grants</li>
+					<li>Arguments:
+						1) action           - <code>read</code> / <code>update</code> / <code>create</code> / <code>delete</code>
+						2) resource type    - string resource key which you define in grants object
+					3) custom function  - with logged user and resource object, it must return boolean or you can throw an error</li>
+					<li>If rule is defined for some action and resource, the function will be called always when you call <code>ac.can(user).read(booking, &#39;bookings&#39;)</code> for example</li>
+					<li><strong>Custom rules have greater importance then <code>ownerFunctions</code>, these functions will be called firstly</strong></li>
 				</ul>
-				<h3 id="codeclimate">Codeclimate</h3>
-				<ul>
-					<li>Log in to <a href="https://codeclimate.com/oss/dashboard">CodeClimate</a></li>
-					<li>Add the project</li>
-					<li>Setup travis <code>CC_TEST_REPORTER_ID</code> env. <a href="https://docs.codeclimate.com/docs/finding-your-test-coverage-token">How to get it</a></li>
-					<li>Setup coverage in <code>.travis.yml</code></li>
-				</ul>
-				<h3 id="snyk">Snyk</h3>
-				<ul>
-					<li>Log in to <a href="https://app.snyk.io">Snyk</a></li>
-					<li>Add project</li>
-					<li>Update badge source and link</li>
-				</ul>
-				<h3 id="david">David</h3>
-				<ul>
-					<li>No need to integrate, just update links</li>
-				</ul>
+				<pre><code class="language-typescript"><span class="hljs-keyword">import</span> { Acl, Action } <span class="hljs-keyword">from</span> <span class="hljs-string">'axesor'</span>;
+
+<span class="hljs-keyword">const</span> ac = <span class="hljs-keyword">new</span> Acl({}, {}); <span class="hljs-comment">// todo</span>
+
+ac.addRule(Action.update, <span class="hljs-string">'bookings'</span>, <span class="hljs-function">(<span class="hljs-params">user, booking</span>) =&gt;</span> {
+    <span class="hljs-keyword">if</span> ((user.roles.includes(<span class="hljs-string">'partner'</span>) &amp;&amp; user.partnerId === booking.partnerId)
+        || user.roles.includes(<span class="hljs-string">'admin'</span>)) {
+        <span class="hljs-keyword">return</span> <span class="hljs-literal">true</span>;
+    }
+    <span class="hljs-keyword">throw</span> <span class="hljs-keyword">new</span> <span class="hljs-built_in">Error</span>(<span class="hljs-string">'You are not allowed to edit this booking'</span>);
+});
+ac.addRule(Action.update, <span class="hljs-string">'bookings'</span>, <span class="hljs-function">(<span class="hljs-params">user, booking</span>) =&gt;</span> {
+    <span class="hljs-keyword">if</span> (booking.state === <span class="hljs-string">'closed'</span> &amp;&amp; !user.roles.includes(<span class="hljs-string">'admin'</span>)) {
+        <span class="hljs-keyword">throw</span> <span class="hljs-keyword">new</span> <span class="hljs-built_in">Error</span>(<span class="hljs-string">'You are not allowed to edit closed booking'</span>);
+    }
+    <span class="hljs-keyword">return</span> <span class="hljs-literal">true</span>;
+});</code></pre>
+				<h2 id="tests">Tests</h2>
+				<pre><code class="language-bash">npm run <span class="hljs-built_in">test</span></code></pre>
 				<h2 id="license">License</h2>
 				<p>This project is licensed under <a href="./LICENSE">MIT</a>.</p>
 			</div>
