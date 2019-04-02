@@ -5,12 +5,11 @@ node_js:
 - '8'
 - '9'
 - '10'
-
 before_script:
-  - curl -L https://codeclimate.com/downloads/test-reporter/test-reporter-latest-linux-amd64 > ./cc-test-reporter
-  - chmod +x ./cc-test-reporter
-  - ./cc-test-reporter before-build
-
+- curl -L https://codeclimate.com/downloads/test-reporter/test-reporter-latest-linux-amd64
+  > ./cc-test-reporter
+- chmod +x ./cc-test-reporter
+- "./cc-test-reporter before-build"
 script:
 - npm run lint
 - npm run build
@@ -22,12 +21,20 @@ after_script:
   - ./cc-test-reporter after-build --debug --exit-code $TRAVIS_TEST_RESULT
 
 deploy:
-  provider: pages
-  skip-cleanup: true
-  github-token:
-    secure: FKgEO9oT1WrMc5gLcNtsFMwQ/HjG2o+jj6ZLP/VQJzctW3crL6NMZuVf2lG9xjguuiGbyvzK0KF0//K43vy2Y/w03LWSq7uSJMx7a3/Q3gZV+B/joni6zROCiSCB/krP+T8OxqRmqeGq6kyYbSl5UFL9BRkR90PbPi6YP4y0f+nYVVg3iwkrkyRfJCzeWm/te0WbkduAqY4el5dKFTj4ra+Dq8A4lPKFoLVs5Rbjmx9/5TgLMBImhZTUJlPsVbSTbxw1PFLbW3kVnmwIygMfVcwjD2a0IOfU+b4sbEtjvdPj6d1vORrvJXN3qtU9KU3iF4GLoAxc0XbjpiXtwgI0STvq1D08IN71F/p+DgUHVEQpx6hk8qTGMdOVKj6+5b0gG+Ya18uSxCdLYEUq7zcQ89I6jrIE8EoUCkYQp+2wjswdqw41S3DyhrCYpmqMb6Co2XXFxyJnIF3j+HraZs3p6eKuSCgFjGmB6bCssJCjagPBD9yBEQWgu74uyOCxkpULo8gmo7+lnmFx6FQLDW+H3ndN4qaytWDHCuXsOwbBZu1Rgca+UtC37hj057QBt1H7/xB0XT5am+kItlJ+QjVDPf9C0hdhFn2cGZCgiB8WDS8/G0wPOhvQUeFFcBuFxJ7ly7TLfX0z2zF83KmgAoBq7XxNxO1OnKJKAhWrSjtlrYs=
-  keep-history: true
-  local-dir: ./docs
-  verbose: true
-  on:
-    branch: master
+  - provider: npm
+    email: ackeedevelopment@gmail.com
+    skip_cleanup: true
+    api_key:
+      secure: f9bA3ShW60v0Im/5N8BJD7RNOUDs5QpD9K5ogTNk+VMFe5MPP7NjaAGZQ+cABrPo3kHc+vNXcJAJmtlNf3jVGuvuKxSYbw9qJRH3VomS+7n+AGOZNW5X7F3l7oLzX5vy78TyZvUfho4Tmz+QXHojApV9YIqJ0RgTE09kImxVJOLcNTYC/Z/3SUHB6HQC0LRnFA2MzgFhqCppn7RbQZ9WLZf0zHMJzkFxePw2xlku2je2N1EDTXGh3ud2h26A2SxJiBWM2pQtTX30rKIQnPWdRZKN7dzabi3TMRx6TlRPYwhRbBRsHKuPo9bd5Ita6bMNysW1dc2D6oVrCrst2ku2F6E9Bz3EJxo7B9e1NP61G0nvbWK0SFGjSsVmvEmIA49MTkCIR1fjmspIZeUeltDOg1SEXpxy6SBhxXJglqtz+N5I1ZcZ9Rox4ykn/v3qsRXjv6unwBpqIc2YSh1ZBTXK0ysE7H0te6nlRibta6lrOeiwfHBRRsF1PPeDnCc5JkSVcYju4XVLCIX4gXn5oqNKNZWjdvEkE8qVG86fHhcKVQENhukvVa9BsDmm5XwejxzNJIp01+prS0cMgzv3W5OXvzWa19gtmy+A4PE4bZkxCqpCTXadW+mBRlxasM+cxSAWk6sMgmdFKpxWBn9qP81Zv3y74aEObEjnWc7lEesJ0mg=
+      on:
+        tags: true
+        repo: AckeeCZ/axesor
+  - provider: pages
+    skip-cleanup: true
+    github-token:
+      secure: FKgEO9oT1WrMc5gLcNtsFMwQ/HjG2o+jj6ZLP/VQJzctW3crL6NMZuVf2lG9xjguuiGbyvzK0KF0//K43vy2Y/w03LWSq7uSJMx7a3/Q3gZV+B/joni6zROCiSCB/krP+T8OxqRmqeGq6kyYbSl5UFL9BRkR90PbPi6YP4y0f+nYVVg3iwkrkyRfJCzeWm/te0WbkduAqY4el5dKFTj4ra+Dq8A4lPKFoLVs5Rbjmx9/5TgLMBImhZTUJlPsVbSTbxw1PFLbW3kVnmwIygMfVcwjD2a0IOfU+b4sbEtjvdPj6d1vORrvJXN3qtU9KU3iF4GLoAxc0XbjpiXtwgI0STvq1D08IN71F/p+DgUHVEQpx6hk8qTGMdOVKj6+5b0gG+Ya18uSxCdLYEUq7zcQ89I6jrIE8EoUCkYQp+2wjswdqw41S3DyhrCYpmqMb6Co2XXFxyJnIF3j+HraZs3p6eKuSCgFjGmB6bCssJCjagPBD9yBEQWgu74uyOCxkpULo8gmo7+lnmFx6FQLDW+H3ndN4qaytWDHCuXsOwbBZu1Rgca+UtC37hj057QBt1H7/xB0XT5am+kItlJ+QjVDPf9C0hdhFn2cGZCgiB8WDS8/G0wPOhvQUeFFcBuFxJ7ly7TLfX0z2zF83KmgAoBq7XxNxO1OnKJKAhWrSjtlrYs=
+    keep-history: true
+    local-dir: "./docs"
+    verbose: true
+    on:
+      branch: master
