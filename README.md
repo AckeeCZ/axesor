@@ -67,6 +67,10 @@ const permission = ac.can(user).read(video, 'video'); // .create(), .update(), .
 const allowedVideo = permission.filter(video);
 ```
 
+- Read / update / delete and create functions have optional parameter `options` with allowed options:
+    
+    * `runGlobalRules`: bool - skip global rules run
+
 ### Custom rules
 
 - You can define custom rules, these functions are called always when you are calling one of the `read` / `update` / `create` / `delete` functions
@@ -96,6 +100,27 @@ ac.addRule(Action.update, 'bookings', (user, booking) => {
     }
     return true;
 });
+```
+
+### Global rules
+
+- Sometimes you would need a custom rule which you would like to use for each action or for each resource and then
+you will want to use global rules
+- Global rules are called before custom rules
+- If global rule fails then it returns permission without grants
+- If global rule succeed then custom rules are called 
+
+```typescript
+import { Acl, Action } from 'axesor';
+
+const ac = new Acl({}, {}); // todo
+
+// This rule will be called before each update and over each resource
+ac.addGlobalRule(Action.update, (user, video) => !!(user && user.roles));
+// This rule will be called before each action and over each resource
+ac.addGlobalRule('*', (user, video) => !!(user && user.roles));
+// You can also skip calling global rules if you use options
+const permission = ac.can(user).read(video, 'video', { runGlobalRules: false });
 ```
 
 ## Tests
