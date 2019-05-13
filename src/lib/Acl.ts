@@ -1,5 +1,5 @@
 import { AccessControl } from 'accesscontrol';
-import { flatten } from 'ramda';
+import { flatten, toPairs } from 'ramda';
 import { AclPermission } from './AclPermission';
 
 interface AclOptions {
@@ -117,6 +117,9 @@ export class Acl {
             this.customFunctions[action][resourceType] = [];
         }
         this.customFunctions[action][resourceType].push(rule);
+    }
+    public addRoleInheritance(inheritanceMap: Record<string, string[]>) {
+        toPairs(inheritanceMap).map(([superRole, subRoles]) => this.ac.grant(superRole).extend(subRoles));
     }
     private getPermission(customFunctions: CustomRule[], options: { user: any, resource: any, action: Action, resourceType: string }) {
         const result = customFunctions
