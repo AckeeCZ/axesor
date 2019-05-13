@@ -8,6 +8,7 @@ interface AclOptions {
     ownerFunctions?: {
         [key: string]: (user: any, resource: any) => boolean;
     };
+    inheritance?: Record<string, string[]>;
 }
 
 interface AclQuery {
@@ -58,6 +59,9 @@ export class Acl {
         this.ownerFunctions = options.ownerFunctions || {};
         for (const actionKey in Action) {
             this.customFunctions[actionKey] = {};
+        }
+        if (options.inheritance) {
+            this.addRoleInheritance(options.inheritance);
         }
     }
     public can(user: any): AclQuery {
