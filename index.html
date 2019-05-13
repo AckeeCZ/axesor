@@ -151,6 +151,40 @@ ac.addRule(Action.update, <span class="hljs-string">'bookings'</span>, <span cla
     }
     <span class="hljs-keyword">return</span> <span class="hljs-literal">true</span>;
 });</code></pre>
+				<h3 id="role-inheritance">Role inheritance</h3>
+				<p>Create a role hierarchy via inheritance.</p>
+				<pre><code class="language-typescript"><span class="hljs-keyword">import</span> { Acl, Action } <span class="hljs-keyword">from</span> <span class="hljs-string">'axesor'</span>;
+
+<span class="hljs-keyword">const</span> grants = {
+    admin: {
+        rocket: {
+            <span class="hljs-string">'create:any'</span>: [<span class="hljs-string">'*'</span>],
+            <span class="hljs-string">'read:any'</span>: [<span class="hljs-string">'*'</span>],
+            <span class="hljs-string">'update:any'</span>: [<span class="hljs-string">'*'</span>],
+            <span class="hljs-string">'delete:any'</span>: [<span class="hljs-string">'*'</span>],
+        }
+    },
+    user: {
+        bike: {
+            <span class="hljs-string">'create:any'</span>: [<span class="hljs-string">'*'</span>],
+            <span class="hljs-string">'read:any'</span>: [<span class="hljs-string">'*'</span>],
+            <span class="hljs-string">'update:any'</span>: [<span class="hljs-string">'*'</span>],
+            <span class="hljs-string">'delete:any'</span>: [<span class="hljs-string">'*'</span>],
+        }
+    }
+};
+
+<span class="hljs-keyword">const</span> inheritance: {
+    <span class="hljs-comment">// admin extends user --&gt; can manage rockets and bikes</span>
+    admin: <span class="hljs-string">'user'</span>,
+    <span class="hljs-comment">// can also inherit multiple: admin: ['user']</span>
+}
+
+<span class="hljs-keyword">const</span> ac = <span class="hljs-keyword">new</span> Acl(grants, { inheritance, <span class="hljs-comment">// todo });</span></code></pre>
+				<pre><code class="language-typescript"><span class="hljs-comment">// alternatively add via method</span>
+<span class="hljs-keyword">const</span> ac = <span class="hljs-keyword">new</span> Acl(grants, { <span class="hljs-comment">// todo });</span>
+ac.addRoleInheritance(inheritance)</code></pre>
+				<p>Make sure to reference only roles defined in grants object. For more info, see <a href="https://github.com/onury/accesscontrol#roles">roles</a>.</p>
 				<h2 id="tests">Tests</h2>
 				<pre><code class="language-bash">npm run <span class="hljs-built_in">test</span></code></pre>
 				<h2 id="license">License</h2>
