@@ -1,5 +1,5 @@
 import { AccessControl } from 'accesscontrol';
-import { flatten, values } from 'ramda';
+import { flatten, toPairs, values } from 'ramda';
 import { AclPermission } from './AclPermission';
 
 interface AclOptions {
@@ -8,6 +8,7 @@ interface AclOptions {
     ownerFunctions?: {
         [key: string]: (user: any, resource: any) => boolean;
     };
+    inheritance?: Record<string, string[]>;
 }
 
 interface AclQuery {
@@ -58,6 +59,9 @@ export class Acl {
         this.ownerFunctions = options.ownerFunctions || {};
         for (const actionKey in Action) {
             this.customFunctions[actionKey] = {};
+        }
+        if (options.inheritance) {
+            this.addRoleInheritance(options.inheritance);
         }
     }
     public can(user: any): AclQuery {
@@ -120,6 +124,9 @@ export class Acl {
             }
             this.customFunctions[action][resourceType].push(rule);
         });
+    }
+    public addRoleInheritance(inheritanceMap: Record<string, string[]>) {
+        toPairs(inheritanceMap).map(([superRole, subRoles]) => this.ac.grant(superRole).extend(subRoles));
     }
     private getPermission(
         customFunctions: CustomRule[],
