@@ -118,7 +118,10 @@ export class Acl {
         }
         this.customFunctions[action][resourceType].push(rule);
     }
-    private getPermission(customFunctions: CustomRule[], options: { user: any, resource: any, action: Action, resourceType: string }) {
+    private getPermission(
+        customFunctions: CustomRule[],
+        options: { user: any; resource: any; action: Action; resourceType: string }
+    ) {
         const result = customFunctions
             .map(customFunction => customFunction(options.user, options.resource))
             .filter(x => x);
@@ -140,8 +143,8 @@ export class Acl {
         });
     }
     private getCreatePermission(user: any, resource: any, resourceType: string) {
-        const attributes = flatten(this.options.getRoles(user)
-            .map(role => {
+        const attributes = flatten(
+            this.options.getRoles(user).map(role => {
                 if (this.ownerFunctions[resourceType] && this.ownerFunctions[resourceType](user, resource)) {
                     return this.ac.can(role).createOwn(resourceType).attributes;
                 }
@@ -150,14 +153,14 @@ export class Acl {
         );
         return this.createPermission(user, {
             resourceType,
-            attributes: [... new Set(attributes)],
+            attributes: [...new Set(attributes)],
             action: Action.create,
             granted: attributes.length > 0,
         });
     }
     private getDeletePermission(user: any, resource: any, resourceType: string) {
-        const attributes = flatten(this.options.getRoles(user)
-            .map(role => {
+        const attributes = flatten(
+            this.options.getRoles(user).map(role => {
                 if (this.ownerFunctions[resourceType] && this.ownerFunctions[resourceType](user, resource)) {
                     return this.ac.can(role).deleteOwn(resourceType).attributes;
                 }
@@ -166,14 +169,14 @@ export class Acl {
         );
         return this.createPermission(user, {
             resourceType,
-            attributes: [... new Set(attributes)],
+            attributes: [...new Set(attributes)],
             action: Action.delete,
             granted: attributes.length > 0,
         });
     }
     private getReadPermission(user: any, resource: any, resourceType: string) {
-        const attributes = flatten(this.options.getRoles(user)
-            .map(role => {
+        const attributes = flatten(
+            this.options.getRoles(user).map(role => {
                 if (this.ownerFunctions[resourceType] && this.ownerFunctions[resourceType](user, resource)) {
                     return this.ac.can(role).readOwn(resourceType).attributes;
                 }
@@ -182,14 +185,14 @@ export class Acl {
         );
         return this.createPermission(user, {
             resourceType,
-            attributes: [... new Set(attributes)],
+            attributes: [...new Set(attributes)],
             action: Action.read,
             granted: attributes.length > 0,
         });
     }
     private getUpdatePermission(user: any, resource: any, resourceType: string) {
-        const attributes = flatten(this.options.getRoles(user)
-            .map(role => {
+        const attributes = flatten(
+            this.options.getRoles(user).map(role => {
                 if (this.ownerFunctions[resourceType] && this.ownerFunctions[resourceType](user, resource)) {
                     return this.ac.can(role).updateOwn(resourceType).attributes;
                 }
@@ -198,7 +201,7 @@ export class Acl {
         );
         return this.createPermission(user, {
             resourceType,
-            attributes: [... new Set(attributes)],
+            attributes: [...new Set(attributes)],
             action: Action.update,
             granted: attributes.length > 0,
         });
