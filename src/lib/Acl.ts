@@ -1,5 +1,5 @@
 import { AccessControl } from 'accesscontrol';
-import { flatten } from 'ramda';
+import { flatten, values } from 'ramda';
 import { AclPermission } from './AclPermission';
 
 interface AclOptions {
@@ -112,11 +112,14 @@ export class Acl {
             },
         };
     }
-    public async addRule(action: Action, resourceType: string, rule: AddRule) {
-        if (!this.customFunctions[action][resourceType]) {
-            this.customFunctions[action][resourceType] = [];
-        }
-        this.customFunctions[action][resourceType].push(rule);
+    public async addRule(actionInput: Action | '*', resourceType: string, rule: AddRule) {
+        const actions = actionInput === '*' ? values(Action) : [actionInput];
+        actions.forEach(action => {
+            if (!this.customFunctions[action][resourceType]) {
+                this.customFunctions[action][resourceType] = [];
+            }
+            this.customFunctions[action][resourceType].push(rule);
+        });
     }
     private getPermission(customFunctions: CustomRule[], options: { user: any, resource: any, action: Action, resourceType: string }) {
         const result = customFunctions
