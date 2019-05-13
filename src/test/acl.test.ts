@@ -167,15 +167,18 @@ describe('ACL', () => {
         });
     });
     test('Simple custom rule', () => {
-        const ac = new Acl({
-            user: {
-                bookings: {
-                    'read:own': ['*'],
+        const ac = new Acl(
+            {
+                user: {
+                    bookings: {
+                        'read:own': ['*'],
+                    },
                 },
             },
-        }, {
-            getRoles: (user: any) => user.roles,
-        });
+            {
+                getRoles: (user: any) => user.roles,
+            }
+        );
         ac.addRule(Action.read, 'bookings', (user, booking) => {
             if (user.roles.includes('partner') && booking.partnerId === user.partnerId) {
                 return true;
@@ -201,15 +204,18 @@ describe('ACL', () => {
         expect(allowedBooking).toEqual(booking);
     });
     test('Simple custom rule - failure', () => {
-        const ac = new Acl({
-            partner: {
-                bookings: {
-                    'read:own': ['*'],
+        const ac = new Acl(
+            {
+                partner: {
+                    bookings: {
+                        'read:own': ['*'],
+                    },
                 },
             },
-        }, {
-            getRoles: (user: any) => user.roles,
-        });
+            {
+                getRoles: (user: any) => user.roles,
+            }
+        );
         ac.addRule(Action.read, 'bookings', (user, booking) => {
             if (user.roles.includes('partner') && booking.partnerId === user.partnerId) {
                 return true;
@@ -235,18 +241,23 @@ describe('ACL', () => {
         expect(allowedBooking).toEqual({});
     });
     test('Advanced custom rule', () => {
-        const ac = new Acl({
-            partner: {
-                bookings: {
-                    'read:own': ['*'],
+        const ac = new Acl(
+            {
+                partner: {
+                    bookings: {
+                        'read:own': ['*'],
+                    },
                 },
             },
-        }, {
-            getRoles: (user: any) => user.roles,
-        });
+            {
+                getRoles: (user: any) => user.roles,
+            }
+        );
         ac.addRule(Action.update, 'bookings', (user, booking) => {
-            if ((user.roles.includes('partner') && user.partnerId === booking.partnerId)
-                || user.roles.includes('admin')) {
+            if (
+                (user.roles.includes('partner') && user.partnerId === booking.partnerId) ||
+                user.roles.includes('admin')
+            ) {
                 return true;
             }
             throw new Error('You are not allowed to edit this booking');
@@ -274,18 +285,23 @@ describe('ACL', () => {
         expect(allowedBooking).toEqual(booking);
     });
     test('Advanced custom rule - failure', () => {
-        const ac = new Acl({
-            partner: {
-                bookings: {
-                    'read:own': ['*'],
+        const ac = new Acl(
+            {
+                partner: {
+                    bookings: {
+                        'read:own': ['*'],
+                    },
                 },
             },
-        }, {
-            getRoles: (user: any) => user.roles,
-        });
+            {
+                getRoles: (user: any) => user.roles,
+            }
+        );
         ac.addRule(Action.update, 'bookings', (user, booking) => {
-            if ((user.roles.includes('partner') && user.partnerId === booking.partnerId)
-                || user.roles.includes('admin')) {
+            if (
+                (user.roles.includes('partner') && user.partnerId === booking.partnerId) ||
+                user.roles.includes('admin')
+            ) {
                 return true;
             }
             throw new Error('You are not allowed to edit this booking');
@@ -306,7 +322,6 @@ describe('ACL', () => {
             createdAt: new Date('2019-03-01'),
             updatedAt: null,
         };
-        expect(() => ac.can(user).update(booking, 'bookings'))
-            .toThrow(Error);
+        expect(() => ac.can(user).update(booking, 'bookings')).toThrow(Error);
     });
 });
