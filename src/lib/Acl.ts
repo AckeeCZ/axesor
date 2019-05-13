@@ -1,5 +1,5 @@
 import { AccessControl } from 'accesscontrol';
-import { flatten, toPairs } from 'ramda';
+import { flatten, toPairs, values } from 'ramda';
 import { AclPermission } from './AclPermission';
 
 interface AclOptions {
@@ -116,11 +116,14 @@ export class Acl {
             },
         };
     }
-    public async addRule(action: Action, resourceType: string, rule: AddRule) {
-        if (!this.customFunctions[action][resourceType]) {
-            this.customFunctions[action][resourceType] = [];
-        }
-        this.customFunctions[action][resourceType].push(rule);
+    public async addRule(actionInput: Action | '*', resourceType: string, rule: AddRule) {
+        const actions = actionInput === '*' ? values(Action) : [actionInput];
+        actions.forEach(action => {
+            if (!this.customFunctions[action][resourceType]) {
+                this.customFunctions[action][resourceType] = [];
+            }
+            this.customFunctions[action][resourceType].push(rule);
+        });
     }
     public addRoleInheritance(inheritanceMap: Record<string, string[]>) {
         toPairs(inheritanceMap).map(([superRole, subRoles]) => this.ac.grant(superRole).extend(subRoles));

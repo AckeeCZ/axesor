@@ -5,7 +5,8 @@
   "author": "Štefan Prokop <sprokop1010@seznam.cz>",
   "contributors": [
     "Štefan Prokop <sprokop1010@seznam.cz>",
-    "Michal Vlasák <michal.vlasak@ackee.cz>"
+    "Michal Vlasák <michal.vlasak@ackee.cz>",
+    "Jaroslav Šmolík <grissius@gmail.com>"
   ],
   "main": "./dist/main.js",
   "engines": {

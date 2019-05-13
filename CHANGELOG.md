@@ -7,6 +7,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased]
 ### Added
 - Changelog
+- Mulit-action custom rules
 - Add role inheritance API
 
 ## [0.1.3] - 2019-04-02
