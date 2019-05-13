@@ -104,6 +104,47 @@ ac.addRule(Action.update, 'bookings', (user, booking) => {
 });
 ```
 
+### Role inheritance
+Create a role hierarchy via inheritance.
+```typescript
+import { Acl, Action } from 'axesor';
+
+const grants = {
+    admin: {
+        rocket: {
+            'create:any': ['*'],
+            'read:any': ['*'],
+            'update:any': ['*'],
+            'delete:any': ['*'],
+        }
+    },
+    user: {
+        bike: {
+            'create:any': ['*'],
+            'read:any': ['*'],
+            'update:any': ['*'],
+            'delete:any': ['*'],
+        }
+    }
+};
+
+const inheritance: {
+    // admin extends user --> can manage rockets and bikes
+    admin: 'user',
+    // can also inherit multiple: admin: ['user']
+}
+
+const ac = new Acl(grants, { inheritance, // todo });
+```
+
+```typescript
+// alternatively add via method
+const ac = new Acl(grants, { // todo });
+ac.addRoleInheritance(inheritance)
+```
+
+Make sure to reference only roles defined in grants object. For more info, see [roles](https://github.com/onury/accesscontrol#roles).
+
 ## Tests
 
 ```bash
