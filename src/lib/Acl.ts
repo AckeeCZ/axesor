@@ -77,7 +77,7 @@ export class Acl {
                             user,
                         });
                     }
-                    return this.getGeneralPermission(action, user, resource, resourceType);
+                    return this.getCrudPermission(action, user, resource, resourceType);
                 };
                 return acc;
             },
@@ -120,7 +120,7 @@ export class Acl {
             roles: this.options.getRoles(user),
         });
     }
-    private getGeneralPermission(action: Action, user: any, resource: any, resourceType: string) {
+    private getCrudPermission(action: Action, user: any, resource: any, resourceType: string) {
         const ownFn = `${action}Own` as 'createOwn' | 'deleteOwn' | 'readOwn' | 'updateOwn';
         const anyFn = `${action}Any` as 'createAny' | 'deleteAny' | 'readAny' | 'updateAny';
         const attributes = flatten(
