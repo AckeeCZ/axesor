@@ -1,4 +1,4 @@
-import { assocPath, path } from 'ramda';
+import { assocPath, path, values } from 'ramda';
 const jp = require('jsonpath');
 
 interface AclPermissionParams {
@@ -28,7 +28,7 @@ export class AclPermission {
             .map((jpPath: string[]) => [jpPath, path(jpPath, data)])
             .reduce((acc: any, [jpPath, data]: [string[], any]) => assocPath(jpPath, data, acc), {});
         if (Array.isArray(data)) {
-            return Object.values(result);
+            return values(result);
         }
         return result;
     }
