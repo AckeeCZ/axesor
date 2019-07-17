@@ -21,11 +21,15 @@ export class AclPermission {
         this.attributes = params.attributes;
     }
     public filter(data: any): any {
-        return this.attributes
+        const result = this.attributes
             .map(attribute => jp.paths(data, `$..${attribute}`))
             .reduce((a, b) => a.concat(b), [])
             .map((jpPath: string[]) => jpPath.slice(1))
             .map((jpPath: string[]) => [jpPath, path(jpPath, data)])
             .reduce((acc: any, [jpPath, data]: [string[], any]) => assocPath(jpPath, data, acc), {});
+        if (Array.isArray(data)) {
+            return Object.values(result);
+        }
+        return result;
     }
 }
