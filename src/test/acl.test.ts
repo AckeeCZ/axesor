@@ -49,6 +49,75 @@ describe('ACL', () => {
         expect(permission.attributes).toEqual([]);
         expect(allowedBook).toEqual({});
     });
+    test('Basic rule with filter', () => {
+        const ac = new Acl(
+            {
+                user: {
+                    books: {
+                        'read:any': ['chapters.*.name'],
+                    },
+                },
+            },
+            { getRoles: user => user.roles }
+        );
+        const user = { id: 1, roles: ['user'] };
+        const book = {
+            id: 1,
+            ownerId: 1,
+            title: 'The Firm',
+            author: 'John Grisham',
+            chapters: [
+                {
+                    name: 'Mitchell McDeere',
+                    pageStart: 1,
+                    pages: 1,
+                },
+                {
+                    name: 'Bendini, Lambert and Locke',
+                    pageStart: 2,
+                    pages: 2,
+                },
+            ],
+        };
+
+        const permission = ac.can(user).read(book, 'books');
+        const allowedBook = permission.filter(book);
+        expect(allowedBook).toEqual({
+            chapters: [
+                {
+                    name: 'Mitchell McDeere',
+                },
+                {
+                    name: 'Bendini, Lambert and Locke',
+                },
+            ],
+        });
+    });
+    test('Basic rule with array filter', () => {
+        const ac = new Acl(
+            {
+                user: {
+                    books: {
+                        'read:any': ['*'],
+                    },
+                },
+            },
+            { getRoles: user => user.roles }
+        );
+        const user = { id: 1, roles: ['user'] };
+        const books = [
+            {
+                name: 'The Great Gatsby',
+            },
+            {
+                name: 'The Firm',
+            },
+        ];
+
+        const permission = ac.can(user).read(books, 'books');
+        const allowedBook = permission.filter(books);
+        expect(allowedBook).toEqual(books);
+    });
     test('Basic rule - own with owner', () => {
         const ac = new Acl(
             {
