@@ -113,8 +113,8 @@ export class Acl {
     private createPermission(user: any, params: PermissionOptions) {
         const attributes = params.attributes;
         return new AclPermission({
+            attributes,
             action: params.action,
-            attributes: !attributes.includes('*') ? attributes : ['*'],
             granted: params.granted,
             resource: params.resourceType,
             roles: this.options.getRoles(user),

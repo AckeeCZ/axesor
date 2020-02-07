@@ -1,5 +1,5 @@
-import { assocPath, path, values } from 'ramda';
-const jp = require('jsonpath');
+import jp from 'jsonpath';
+import { assocPath, dissocPath, path, values } from 'ramda';
 
 interface AclPermissionParams {
     action: string;
@@ -21,15 +21,32 @@ export class AclPermission {
         this.attributes = params.attributes;
     }
     public filter(data: any): any {
-        const result = this.attributes
+        let result = this.attributes
+            .filter(attribute => attribute.charAt(0) !== '!')
             .map(attribute => jp.paths(data, `$..${attribute}`))
             .reduce((a, b) => a.concat(b), [])
-            .map((jpPath: string[]) => jpPath.slice(1))
-            .map((jpPath: string[]) => [jpPath, path(jpPath, data)])
-            .reduce((acc: any, [jpPath, data]: [string[], any]) => assocPath(jpPath, data, acc), {});
+            .map(jpPath => jpPath.slice(1))
+            .map(jpPath => [jpPath, path(jpPath, data)])
+            // @ts-ignore
+            .reduce((acc, [jpPath, data]) => assocPath(jpPath, data, acc), {});
+        result = this.excludeFields(result);
         if (Array.isArray(data)) {
             return values(result);
         }
         return result;
+    }
+    private excludeFields(data: any): any {
+        const toExclude = this.attributes.filter(attribute => attribute.charAt(0) === '!');
+        if (toExclude.length <= 0) {
+            return data;
+        }
+        return (
+            toExclude
+                .map(attribute => jp.paths(data, `$..${attribute.substr(1)}`))
+                .reduce((a, b) => a.concat(b), [])
+                .map(jpPath => jpPath.slice(1))
+                // @ts-ignore
+                .reduce((acc, jpPath) => dissocPath(jpPath, data, acc), {})
+        );
     }
 }
