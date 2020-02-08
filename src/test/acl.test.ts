@@ -459,7 +459,7 @@ describe('ACL', () => {
         const ac = new Acl(
             {
                 user: {
-                    books: {
+                    book: {
                         'read:any': ['*', '!pages.0.number', '!type'],
                     },
                 },
@@ -469,29 +469,24 @@ describe('ACL', () => {
             }
         );
         const user = { roles: ['user'] };
-        const books = [
-            {
-                id: 1,
-                name: 'Lorem',
-                type: 'paper',
-                pages: [
-                    { number: 1, text: 'Lorem' },
-                    { number: 2, text: 'Lorem Ipsum' },
-                ],
-            },
-        ];
-        const permission = ac.can(user).read(books, 'books');
-        const allowedBooks = permission.filter(books);
+        const book = {
+            id: 1,
+            name: 'Lorem',
+            type: 'paper',
+            pages: [
+                { number: 1, text: 'Lorem' },
+                { number: 2, text: 'Lorem Ipsum' },
+            ],
+        };
+        const permission = ac.can(user).read(book, 'book');
+        const allowedBook = permission.filter(book);
         expect(permission.granted).toBe(true);
-        expect(Array.isArray(allowedBooks)).toBe(true);
-        expect(allowedBooks).toHaveLength(1);
-        const book = allowedBooks[0];
-        expect(Object.keys(book)).toEqual(['id', 'name', 'pages']);
-        expect(Array.isArray(book.pages)).toBe(true);
-        expect(book.pages.length).toEqual(2);
-        const firstPage = book.pages[0];
+        expect(Object.keys(allowedBook)).toEqual(['id', 'name', 'pages']);
+        expect(Array.isArray(allowedBook.pages)).toBe(true);
+        expect(allowedBook.pages.length).toEqual(2);
+        const firstPage = allowedBook.pages[0];
         expect(Object.keys(firstPage).length).toEqual(1);
         expect(Object.keys(firstPage)).toEqual(['text']);
-        expect(Object.keys(book.pages[1])).toEqual(['number', 'text']);
+        expect(Object.keys(allowedBook.pages[1])).toEqual(['number', 'text']);
     });
 });
