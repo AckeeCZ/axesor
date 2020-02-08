@@ -40,13 +40,10 @@ export class AclPermission {
         if (toExclude.length <= 0) {
             return data;
         }
-        return (
-            toExclude
-                .map(attribute => jp.paths(data, `$..${attribute.substr(1)}`))
-                .reduce((a, b) => a.concat(b), [])
-                .map(jpPath => jpPath.slice(1))
-                // @ts-ignore
-                .reduce((acc, jpPath) => dissocPath(jpPath, data, acc), {})
-        );
+        return toExclude
+            .map(attribute => jp.paths(data, `$..${attribute.substr(1)}`))
+            .reduce((a, b) => a.concat(b), [])
+            .map(jpPath => jpPath.slice(1))
+            .reduce((acc, jpPath) => dissocPath(jpPath, acc), data);
     }
 }

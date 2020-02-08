@@ -212,7 +212,10 @@ describe('ACL', () => {
             }
         );
         const user = { id: 1, roles: ['user'] };
-        const bookPages = [{ id: 1, number: 64 }, { id: 2, number: 23 }];
+        const bookPages = [
+            { id: 1, number: 64 },
+            { id: 2, number: 23 },
+        ];
         const book = {
             id: 1,
             ownerId: 1,
@@ -432,7 +435,10 @@ describe('ACL', () => {
                 id: 1,
                 name: 'Lorem',
                 type: 'paper',
-                pages: [{ number: 1, text: 'Lorem' }, { number: 2, text: 'Lorem Ipsum' }],
+                pages: [
+                    { number: 1, text: 'Lorem' },
+                    { number: 2, text: 'Lorem Ipsum' },
+                ],
             },
         ];
         const permission = ac.can(user).read(books, 'books');
@@ -442,6 +448,45 @@ describe('ACL', () => {
         expect(allowedBooks).toHaveLength(1);
         const book = allowedBooks[0];
         expect(Object.keys(book)).toEqual(['id', 'name', 'type', 'pages']);
+        expect(Array.isArray(book.pages)).toBe(true);
+        expect(book.pages.length).toEqual(2);
+        const firstPage = book.pages[0];
+        expect(Object.keys(firstPage).length).toEqual(1);
+        expect(Object.keys(firstPage)).toEqual(['text']);
+        expect(Object.keys(book.pages[1])).toEqual(['number', 'text']);
+    });
+    test('Exclude more paths', () => {
+        const ac = new Acl(
+            {
+                user: {
+                    books: {
+                        'read:any': ['*', '!pages.0.number', '!type'],
+                    },
+                },
+            },
+            {
+                getRoles: (user: any) => user.roles,
+            }
+        );
+        const user = { roles: ['user'] };
+        const books = [
+            {
+                id: 1,
+                name: 'Lorem',
+                type: 'paper',
+                pages: [
+                    { number: 1, text: 'Lorem' },
+                    { number: 2, text: 'Lorem Ipsum' },
+                ],
+            },
+        ];
+        const permission = ac.can(user).read(books, 'books');
+        const allowedBooks = permission.filter(books);
+        expect(permission.granted).toBe(true);
+        expect(Array.isArray(allowedBooks)).toBe(true);
+        expect(allowedBooks).toHaveLength(1);
+        const book = allowedBooks[0];
+        expect(Object.keys(book)).toEqual(['id', 'name', 'pages']);
         expect(Array.isArray(book.pages)).toBe(true);
         expect(book.pages.length).toEqual(2);
         const firstPage = book.pages[0];
