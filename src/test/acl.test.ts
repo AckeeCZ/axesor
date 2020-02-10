@@ -196,6 +196,7 @@ describe('ACL', () => {
         const allowedBook = permission.filter(book);
 
         expect(permission.granted).toBe(true);
+        expect(permission.attributes.sort()).toEqual(['*', 'author', 'title']);
         expect(allowedBook).toEqual(book);
     });
     test('Basic rule - nested object', () => {

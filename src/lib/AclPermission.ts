@@ -27,8 +27,7 @@ export class AclPermission {
             .reduce((a, b) => a.concat(b), [])
             .map(jpPath => jpPath.slice(1))
             .map(jpPath => [jpPath, path(jpPath, data)])
-            // @ts-ignore
-            .reduce((acc, [jpPath, data]) => assocPath(jpPath, data, acc), {});
+            .reduce((acc, [jpPath, data]) => assocPath(jpPath as string[], data, acc), {});
         result = this.excludeFields(result);
         if (Array.isArray(data)) {
             return values(result);
