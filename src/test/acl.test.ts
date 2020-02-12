@@ -196,7 +196,7 @@ describe('ACL', () => {
         const allowedBook = permission.filter(book);
 
         expect(permission.granted).toBe(true);
-        expect(permission.attributes).toEqual(['*']);
+        expect(permission.attributes.sort()).toEqual(['*', 'author', 'title']);
         expect(allowedBook).toEqual(book);
     });
     test('Basic rule - nested object', () => {
@@ -213,7 +213,10 @@ describe('ACL', () => {
             }
         );
         const user = { id: 1, roles: ['user'] };
-        const bookPages = [{ id: 1, number: 64 }, { id: 2, number: 23 }];
+        const bookPages = [
+            { id: 1, number: 64 },
+            { id: 2, number: 23 },
+        ];
         const book = {
             id: 1,
             ownerId: 1,
@@ -392,5 +395,99 @@ describe('ACL', () => {
             updatedAt: null,
         };
         expect(() => ac.can(user).update(booking, 'bookings')).toThrow(Error);
+    });
+    test('Exclude fields', () => {
+        const ac = new Acl(
+            {
+                user: {
+                    book: {
+                        'read:any': ['*', '!author'],
+                    },
+                },
+            },
+            {
+                getRoles: (user: any) => user.roles,
+            }
+        );
+        const user = { id: 1, roles: ['user'] };
+        const book = { id: 1, name: 'Romeo & Juliet', author: 'William Shakespeare', type: 'ebook' };
+        const permission = ac.can(user).read(book, 'book');
+        const allowedBook = permission.filter(book);
+        expect(permission.granted).toBe(true);
+        expect(Object.keys(allowedBook).length).toEqual(3);
+        expect(Object.keys(allowedBook)).toEqual(['id', 'name', 'type']);
+    });
+    test('Exclude path', () => {
+        const ac = new Acl(
+            {
+                user: {
+                    books: {
+                        'read:any': ['*', '!pages.0.number'],
+                    },
+                },
+            },
+            {
+                getRoles: (user: any) => user.roles,
+            }
+        );
+        const user = { roles: ['user'] };
+        const books = [
+            {
+                id: 1,
+                name: 'Lorem',
+                type: 'paper',
+                pages: [
+                    { number: 1, text: 'Lorem' },
+                    { number: 2, text: 'Lorem Ipsum' },
+                ],
+            },
+        ];
+        const permission = ac.can(user).read(books, 'books');
+        const allowedBooks = permission.filter(books);
+        expect(permission.granted).toBe(true);
+        expect(Array.isArray(allowedBooks)).toBe(true);
+        expect(allowedBooks).toHaveLength(1);
+        const book = allowedBooks[0];
+        expect(Object.keys(book)).toEqual(['id', 'name', 'type', 'pages']);
+        expect(Array.isArray(book.pages)).toBe(true);
+        expect(book.pages.length).toEqual(2);
+        const firstPage = book.pages[0];
+        expect(Object.keys(firstPage).length).toEqual(1);
+        expect(Object.keys(firstPage)).toEqual(['text']);
+        expect(Object.keys(book.pages[1])).toEqual(['number', 'text']);
+    });
+    test('Exclude more paths', () => {
+        const ac = new Acl(
+            {
+                user: {
+                    book: {
+                        'read:any': ['*', '!pages.0.number', '!type'],
+                    },
+                },
+            },
+            {
+                getRoles: (user: any) => user.roles,
+            }
+        );
+        const user = { roles: ['user'] };
+        const book = {
+            id: 1,
+            name: 'Lorem',
+            type: 'paper',
+            pages: [
+                { number: 1, text: 'Lorem' },
+                { number: 2, text: 'Lorem Ipsum' },
+            ],
+        };
+        const permission = ac.can(user).read(book, 'book');
+        const allowedBook = permission.filter(book);
+        expect(permission.granted).toBe(true);
+        expect(Object.keys(allowedBook)).toEqual(['id', 'name', 'pages']);
+        expect(Array.isArray(allowedBook.pages)).toBe(true);
+        expect(allowedBook.pages.length).toEqual(2);
+        const firstPage = allowedBook.pages[0];
+        expect(Object.keys(firstPage).length).toEqual(1);
+        expect(Object.keys(firstPage)).toEqual(['text']);
+        expect(Object.keys(allowedBook.pages[1])).toEqual(['number', 'text']);
     });
 });
