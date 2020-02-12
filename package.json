@@ -1,7 +1,7 @@
 {
   "name": "axesor",
   "description": "Axesor is tiny package for working with ACLs",
-  "version": "0.1.5",
+  "version": "0.1.6",
   "author": "Štefan Prokop <sprokop1010@seznam.cz>",
   "contributors": [
     "Štefan Prokop <sprokop1010@seznam.cz>",
