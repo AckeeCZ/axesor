@@ -71,12 +71,18 @@
 					<a href="https://david-dm.org/AckeeCZ/node-acl?type=dev"><img src="https://img.shields.io/david/dev/AckeeCZ/node-acl.svg?style=flat-square" alt="Dev Dependency Status"></a></p>
 					<img src="./resources/logo.png" height="170"/>
 				</div>
-				<h1 id="axesor">Axesor</h1>
+				<a href="#axesor" id="axesor" style="color: inherit; text-decoration: none;">
+					<h1>Axesor</h1>
+				</a>
 				<p>Axesor is tiny package for working with ACLs. Axesor using the <a href="https://github.com/onury/accesscontrol"><code>accesscontrol</code></a> package. </p>
 				<p>GitHub repository: <a href="https://github.com/AckeeCZ/axesor">https://github.com/AckeeCZ/axesor</a></p>
-				<h2 id="install">Install</h2>
+				<a href="#install" id="install" style="color: inherit; text-decoration: none;">
+					<h2>Install</h2>
+				</a>
 				<pre><code class="language-bash">npm i --save axesor</code></pre>
-				<h2 id="usage">Usage</h2>
+				<a href="#usage" id="usage" style="color: inherit; text-decoration: none;">
+					<h2>Usage</h2>
+				</a>
 				<pre><code class="language-typescript"><span class="hljs-keyword">import</span> { Acl } <span class="hljs-keyword">from</span> <span class="hljs-string">'axesor'</span>;
 
 <span class="hljs-comment">// define all your grants</span>
@@ -123,7 +129,9 @@
 <span class="hljs-comment">// you can use filter function to filter fields from resource which user can manipulate with</span>
 <span class="hljs-comment">// this function filters recursively</span>
 <span class="hljs-keyword">const</span> allowedVideo = permission.filter(video);</code></pre>
-				<h3 id="custom-rules">Custom rules</h3>
+				<a href="#custom-rules" id="custom-rules" style="color: inherit; text-decoration: none;">
+					<h3>Custom rules</h3>
+				</a>
 				<ul>
 					<li>You can define custom rules, these functions are called always when you are calling one of the <code>read</code> / <code>update</code> / <code>create</code> / <code>delete</code> functions</li>
 					<li>Custom rules returns inside the <code>attributes</code> field only <code>[]</code> or <code>[&#39;*&#39;]</code> - not allowed or allowed with all grants</li>
@@ -151,7 +159,9 @@ ac.addRule(Action.update, <span class="hljs-string">'bookings'</span>, <span cla
     }
     <span class="hljs-keyword">return</span> <span class="hljs-literal">true</span>;
 });</code></pre>
-				<h3 id="role-inheritance">Role inheritance</h3>
+				<a href="#role-inheritance" id="role-inheritance" style="color: inherit; text-decoration: none;">
+					<h3>Role inheritance</h3>
+				</a>
 				<p>Create a role hierarchy via inheritance.</p>
 				<pre><code class="language-typescript"><span class="hljs-keyword">import</span> { Acl, Action } <span class="hljs-keyword">from</span> <span class="hljs-string">'axesor'</span>;
 
@@ -185,9 +195,13 @@ ac.addRule(Action.update, <span class="hljs-string">'bookings'</span>, <span cla
 <span class="hljs-keyword">const</span> ac = <span class="hljs-keyword">new</span> Acl(grants, { <span class="hljs-comment">// todo });</span>
 ac.addRoleInheritance(inheritance)</code></pre>
 				<p>Make sure to reference only roles defined in grants object. For more info, see <a href="https://github.com/onury/accesscontrol#roles">roles</a>.</p>
-				<h2 id="tests">Tests</h2>
+				<a href="#tests" id="tests" style="color: inherit; text-decoration: none;">
+					<h2>Tests</h2>
+				</a>
 				<pre><code class="language-bash">npm run <span class="hljs-built_in">test</span></code></pre>
-				<h2 id="license">License</h2>
+				<a href="#license" id="license" style="color: inherit; text-decoration: none;">
+					<h2>License</h2>
+				</a>
 				<p>This project is licensed under <a href="./LICENSE">MIT</a>.</p>
 			</div>
 		</div>
@@ -240,9 +254,6 @@ ac.addRoleInheritance(inheritance)</code></pre>
 					<li class=" tsd-kind-type-alias tsd-is-not-exported">
 						<a href="globals.html#isowner" class="tsd-kind-icon">Is<wbr>Owner</a>
 					</li>
-					<li class=" tsd-kind-variable tsd-is-not-exported">
-						<a href="globals.html#jp" class="tsd-kind-icon">jp</a>
-					</li>
 				</ul>
 			</nav>
 		</div>
@@ -260,6 +271,7 @@ ac.addRoleInheritance(inheritance)</code></pre>
 				<li class="tsd-kind-function tsd-has-type-parameter"><span class="tsd-kind-icon">Function with type parameter</span></li>
 				<li class="tsd-kind-index-signature"><span class="tsd-kind-icon">Index signature</span></li>
 				<li class="tsd-kind-type-alias"><span class="tsd-kind-icon">Type alias</span></li>
+				<li class="tsd-kind-type-alias tsd-has-type-parameter"><span class="tsd-kind-icon">Type alias with type parameter</span></li>
 			</ul>
 			<ul class="tsd-legend">
 				<li class="tsd-kind-enum"><span class="tsd-kind-icon">Enumeration</span></li>
@@ -308,7 +320,7 @@ ac.addRoleInheritance(inheritance)</code></pre>
 	</div>
 </footer>
 <div class="container tsd-generator">
-	<p>Generated using <a href="http://typedoc.org/" target="_blank">TypeDoc</a></p>
+	<p>Generated using <a href="https://typedoc.org/" target="_blank">TypeDoc</a></p>
 </div>
 <div class="overlay"></div>
 <script src="assets/js/main.js"></script>
