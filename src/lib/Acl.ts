@@ -113,7 +113,9 @@ export class Acl {
     private createPermission(user: any, params: PermissionOptions) {
         const attributes = params.attributes;
         return new AclPermission({
-            attributes,
+            attributes: attributes.includes('*')
+                ? attributes.filter(attr => attr === '*' || attr.charAt(0) === '!')
+                : attributes,
             action: params.action,
             granted: params.granted,
             resource: params.resourceType,
