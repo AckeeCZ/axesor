@@ -196,7 +196,7 @@ describe('ACL', () => {
         const allowedBook = permission.filter(book);
 
         expect(permission.granted).toBe(true);
-        expect(permission.attributes.sort()).toEqual(['*', 'author', 'title']);
+        expect(permission.attributes.sort()).toEqual(['*']);
         expect(allowedBook).toEqual(book);
     });
     test('Basic rule - nested object', () => {
@@ -213,10 +213,7 @@ describe('ACL', () => {
             }
         );
         const user = { id: 1, roles: ['user'] };
-        const bookPages = [
-            { id: 1, number: 64 },
-            { id: 2, number: 23 },
-        ];
+        const bookPages = [{ id: 1, number: 64 }, { id: 2, number: 23 }];
         const book = {
             id: 1,
             ownerId: 1,
@@ -436,10 +433,7 @@ describe('ACL', () => {
                 id: 1,
                 name: 'Lorem',
                 type: 'paper',
-                pages: [
-                    { number: 1, text: 'Lorem' },
-                    { number: 2, text: 'Lorem Ipsum' },
-                ],
+                pages: [{ number: 1, text: 'Lorem' }, { number: 2, text: 'Lorem Ipsum' }],
             },
         ];
         const permission = ac.can(user).read(books, 'books');
@@ -474,10 +468,7 @@ describe('ACL', () => {
             id: 1,
             name: 'Lorem',
             type: 'paper',
-            pages: [
-                { number: 1, text: 'Lorem' },
-                { number: 2, text: 'Lorem Ipsum' },
-            ],
+            pages: [{ number: 1, text: 'Lorem' }, { number: 2, text: 'Lorem Ipsum' }],
         };
         const permission = ac.can(user).read(book, 'book');
         const allowedBook = permission.filter(book);
@@ -489,5 +480,28 @@ describe('ACL', () => {
         expect(Object.keys(firstPage).length).toEqual(1);
         expect(Object.keys(firstPage)).toEqual(['text']);
         expect(Object.keys(allowedBook.pages[1])).toEqual(['number', 'text']);
+    });
+    test('Filter out unnecessary permission attributes', () => {
+        const user = { roles: ['user'] };
+        const book = {
+            id: 1,
+            name: 'Lorem',
+            type: 'paper',
+            pages: [{ number: 1, text: 'Lorem' }, { number: 2, text: 'Lorem Ipsum' }],
+        };
+        const acl = new Acl(
+            {
+                user: {
+                    book: {
+                        'read:any': ['*', '*', 'pages', 'pages', 'type', 'chapters', '!authors'],
+                    },
+                },
+            },
+            {
+                getRoles: (user: any) => user.roles,
+            }
+        );
+        const permission = acl.can(user).read(book, 'book');
+        expect(permission.attributes.sort()).toEqual(['*', '!authors'].sort());
     });
 });
