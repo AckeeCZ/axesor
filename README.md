@@ -1,5 +1,12 @@
 <div align="center">
 
+## DEPRECATION NOTICE
+
+This package is no longer maintained.
+</div>
+
+<div align="center">
+
 [![Build Status](https://img.shields.io/travis/com/AckeeCZ/axesor/master.svg?style=flat-square)](https://travis-ci.com/AckeeCZ/axesor)
 [![Coverage](https://img.shields.io/codeclimate/coverage/AckeeCZ/axesor.svg?style=flat-square)](https://codeclimate.com/github/AckeeCZ/axesor)
 [![Maintainability](https://img.shields.io/codeclimate/maintainability/AckeeCZ/axesor.svg?style=flat-square)](https://codeclimate.com/github/AckeeCZ/axesor)
